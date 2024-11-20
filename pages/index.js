@@ -3,55 +3,50 @@ import { useState } from "react";
 export default function Home() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
   const handleSearch = async () => {
-    if (!query) {
-      setError("Please enter a search query.");
-      return;
-    }
-
-    setError("");
-    setResults([]);
+    setError(null); // Reset errors before search
     try {
       const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
       const data = await response.json();
+
       if (response.ok) {
         setResults(data.results);
       } else {
         setError(data.error || "An error occurred.");
       }
-    } catch {
+    } catch (err) {
       setError("Failed to fetch results.");
     }
   };
 
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", padding: "20px" }}>
-      <h1>Search Results for Cincinnati, Ohio</h1>
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+      <h1>Cincinnati Local Search</h1>
       <input
         type="text"
-        placeholder="Enter search query"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        style={{ padding: "10px", width: "300px" }}
+        placeholder="Enter your query"
+        style={{ padding: "10px", marginRight: "10px", width: "300px" }}
       />
-      <button onClick={handleSearch} style={{ marginLeft: "10px", padding: "10px" }}>
+      <button onClick={handleSearch} style={{ padding: "10px 20px" }}>
         Search
       </button>
+
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {results.length > 0 && (
-        <ul>
-          {results.map((result, index) => (
-            <li key={index} style={{ margin: "10px 0" }}>
-              <a href={result.url} target="_blank" rel="noopener noreferrer">
-                {result.title}
-              </a>
-              <p>{result.snippet}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+
+      <ul style={{ marginTop: "20px" }}>
+        {results.map((result, index) => (
+          <li key={index} style={{ marginBottom: "10px" }}>
+            <a href={result.url} target="_blank" rel="noopener noreferrer">
+              {result.title}
+            </a>
+            <p>{result.snippet}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
