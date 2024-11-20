@@ -20,26 +20,26 @@ export default async function handler(req, res) {
       params: {
         access_key: SERPSTACK_API_KEY,
         query,
-        location: "Cincinnati, Ohio",
-        gl: "us",
-        hl: "en",
-        google_domain: "google.com",
+        location: "Cincinnati, Ohio, United States", // Hardcoded to Cincinnati
+        gl: "us", // Country code for United States
+        hl: "en", // Language set to English
+        google_domain: "google.com", // Use US-specific Google domain
+        auto_location: 0, // Explicitly disables auto-location
       },
     });
 
-    if (!response.data || !response.data.organic_results) {
-      res.status(404).json({ error: "No results found for Cincinnati." });
-      return;
-    }
+    const results = response.data.organic_results || [];
 
     res.status(200).json({
-      results: response.data.organic_results.map((result) => ({
+      results: results.map((result) => ({
         title: result.title,
         url: result.url,
         snippet: result.snippet,
+        domain: result.domain,
       })),
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error fetching results:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
