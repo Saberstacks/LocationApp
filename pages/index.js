@@ -4,6 +4,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
+  const [detectedLocation, setDetectedLocation] = useState("");
 
   const handleSearch = async () => {
     if (!query) {
@@ -20,6 +21,7 @@ export default function Home() {
 
       if (response.ok) {
         setResults(data.results);
+        setDetectedLocation(data.detectedLocation);
       } else {
         setError(data.error || "An error occurred while fetching results.");
       }
@@ -40,6 +42,7 @@ export default function Home() {
       <button onClick={handleSearch}>Search</button>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <div>
+        <h3>Detected Location: {detectedLocation || "Unknown"}</h3>
         {results.length > 0 ? (
           results.map((result, index) => (
             <div key={index} style={{ marginBottom: "10px" }}>
