@@ -30,12 +30,12 @@ export default async function handler(req, res) {
       },
     });
 
-    if (!response.data.success) {
-      throw new Error(response.data.error.info || "API Error");
+    if (response.data && !response.data.success) {
+      throw new Error(response.data.error?.info || "API error occurred");
     }
 
-    const results = response.data.organic_results || [];
-    const detectedLocation = response.data.search_information?.detected_location || "Unknown";
+    const results = response.data?.organic_results || [];
+    const detectedLocation = response.data?.search_information?.detected_location || "Unknown";
 
     res.status(200).json({
       detectedLocation,
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       })),
     });
   } catch (error) {
-    console.error("Error fetching results:", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error in backend:", error.message);
+    res.status(500).json({ error: error.message || "Internal server error" });
   }
 }
