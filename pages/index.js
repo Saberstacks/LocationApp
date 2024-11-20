@@ -7,12 +7,23 @@ export default function Home() {
 
   const handleSearch = async () => {
     setError(null); // Reset errors before search
+    setResults([]); // Clear previous results
+
+    if (!query) {
+      setError("Please enter a search query.");
+      return;
+    }
+
     try {
       const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
       const data = await response.json();
 
       if (response.ok) {
-        setResults(data.results);
+        if (data.results.length === 0) {
+          setError("No results found for Cincinnati.");
+        } else {
+          setResults(data.results);
+        }
       } else {
         setError(data.error || "An error occurred.");
       }
