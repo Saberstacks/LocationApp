@@ -14,7 +14,7 @@ export default function Home() {
     try {
       const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
       if (!response.ok) {
-        throw new Error(`API error occurred: ${response.statusText}`);
+        throw new Error(`API error: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -42,7 +42,6 @@ export default function Home() {
       <button onClick={handleSearch}>Search</button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-
       {detectedLocation && <p>Detected Location: {detectedLocation}</p>}
 
       <ul>
