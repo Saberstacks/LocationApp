@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const SERPSTACK_API_KEY = process.env.SERPSTACK_API_KEY; // Environment variable for the API key
+const SERPSTACK_API_KEY = process.env.SERPSTACK_API_KEY;
 
 export default async function handler(req, res) {
   const { query } = req.query;
@@ -21,9 +21,12 @@ export default async function handler(req, res) {
       params: {
         access_key: SERPSTACK_API_KEY,
         query: query,
-        location: "Cincinnati, Ohio", // Hardcoded location
-        num: 10 // Limit results to 10
-      }
+        google_domain: "google.com", // Use the US Google domain
+        gl: "us", // Country code for the United States
+        hl: "en", // Language set to English
+        location: "Cincinnati, Ohio", // Attempt location targeting
+        num: 10, // Limit results to 10
+      },
     });
 
     // Handle API errors
@@ -31,12 +34,16 @@ export default async function handler(req, res) {
       throw new Error(response.data.error.info);
     }
 
-    // Extract and send back the results
-    const results = response.data.organic_results;
+    // Filter results to ensure relevance to Cincinnati
+    const results = response.data.organic_results.filter((result) =>
+      result.snippet.toLowerCase().includes("cincinnati")
+    );
+
+    // Send filtered results back to the user
     res.status(200).json({ results });
   } catch (error) {
     res.status(500).json({
-      error: error.message || "Failed to fetch data from Serpstack API."
+      error: error.message || "Failed to fetch data from Serpstack API.",
     });
   }
 }
