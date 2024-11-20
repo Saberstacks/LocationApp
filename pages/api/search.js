@@ -21,33 +21,31 @@ export default async function handler(req, res) {
         access_key: SERPSTACK_API_KEY,
         query,
         location: "Cincinnati, Ohio, United States", // Hardcoded location
-        gl: "us", // U.S. geo-targeting
-        hl: "en", // Language English
+        auto_location: 0, // Disable auto-location
+        gl: "us", // U.S. location targeting
+        hl: "en", // English language
         google_domain: "google.com", // Explicit Google domain
-        auto_location: 0, // Force manual location
-        type: "web", // Standard web search
         num: 10, // Limit to 10 results
       },
     });
 
-    if (response.data && !response.data.success) {
-      throw new Error(response.data.error?.info || "API error occurred");
+    if (!response.data || !response.data.organic_results) {
+      res.status(500).json({ error: "No results found or API error occurred" });
+      return;
     }
 
-    const results = response.data?.organic_results || [];
-    const detectedLocation = response.data?.search_information?.detected_location || "Unknown";
+    const results = response.data.organic_results.map((result) => ({
+      title: result.title,
+      url: result.url,
+      snippet: result.snippet || "No snippet available",
+      domain: result.domain,
+    }));
 
-    res.status(200).json({
-      detectedLocation,
-      results: results.map((result) => ({
-        title: result.title,
-        url: result.url,
-        snippet: result.snippet,
-        domain: result.domain,
-      })),
-    });
+    const detectedLocation = response.data.search_information?.detected_location || "Unknown";
+
+    res.status(200).json({ detectedLocation, results });
   } catch (error) {
     console.error("Error in backend:", error.message);
-    res.status(500).json({ error: error.message || "Internal server error" });
+    res.status(500).json({ error: "API request failed. Please check your API key and configuration." });
   }
 }
