@@ -21,18 +21,20 @@ export default async function handler(req, res) {
         access_key: SERPSTACK_API_KEY,
         query,
         location: "Cincinnati, Ohio, United States", // Hardcoded location
-        gl: "us", // U.S. targeting
-        hl: "en", // English language
-        google_domain: "google.com", // Explicit U.S. Google domain
-        auto_location: 0, // Disables auto-location
-        type: "web", // Ensures it's web search only
-        num: 10, // Limits results to 10 for clarity
+        gl: "us", // U.S. geo-targeting
+        hl: "en", // Language English
+        google_domain: "google.com", // Explicit Google domain
+        auto_location: 0, // Force manual location
+        type: "web", // Standard web search
+        num: 10, // Limit to 10 results
       },
     });
 
-    const results = response.data.organic_results || [];
+    if (!response.data.success) {
+      throw new Error(response.data.error.info || "API Error");
+    }
 
-    // Append detected location for debugging
+    const results = response.data.organic_results || [];
     const detectedLocation = response.data.search_information?.detected_location || "Unknown";
 
     res.status(200).json({
