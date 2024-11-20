@@ -19,20 +19,20 @@ export default async function handler(req, res) {
         access_key: SERPSTACK_API_KEY,
         query,
         location: "Cincinnati, Ohio, United States", // Hardcoded location
-        auto_location: 0,
+        auto_location: 0, // Disable auto-location detection
+        google_domain: "google.com",
         gl: "us",
         hl: "en",
-        google_domain: "google.com",
         num: 10, // Limit to 10 results
       },
-      timeout: 10000, // Set timeout to 10 seconds
+      timeout: 10000, // Timeout after 10 seconds
     });
 
-    const { organic_results, search_information } = response.data || {};
+    const { organic_results, search_information } = response.data;
 
     if (!organic_results || organic_results.length === 0) {
       return res.status(500).json({
-        error: "No results found. Ensure the API key and location are configured correctly.",
+        error: "No results found for Cincinnati. Verify API key or query syntax.",
       });
     }
 
@@ -47,12 +47,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ detectedLocation, results });
   } catch (error) {
-    console.error("Error in backend:", error.message);
-
-    // Log raw response for debugging if available
-    if (error.response) {
-      console.error("Raw API response:", error.response.data);
-    }
+    console.error("API Error:", error.message);
 
     res.status(500).json({
       error: error.response?.data?.error?.info || "An unknown error occurred.",
