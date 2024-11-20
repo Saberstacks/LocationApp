@@ -3,13 +3,11 @@ import { useState } from "react";
 export default function Home() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
-  const [detectedLocation, setDetectedLocation] = useState("");
   const [error, setError] = useState("");
 
   const handleSearch = async () => {
     setError("");
     setResults([]);
-    setDetectedLocation("");
 
     try {
       const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
@@ -22,7 +20,6 @@ export default function Home() {
       if (data.error) {
         setError(data.error);
       } else {
-        setDetectedLocation(data.detectedLocation);
         setResults(data.results);
       }
     } catch (err) {
@@ -42,7 +39,6 @@ export default function Home() {
       <button onClick={handleSearch}>Search</button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {detectedLocation && <p>Detected Location: {detectedLocation}</p>}
 
       <ul>
         {results.map((result, index) => (
