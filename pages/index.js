@@ -5,59 +5,55 @@ export default function Home() {
   const [results, setResults] = useState([]);
   const [error, setError] = useState(null);
 
-  const handleSearch = async () => {
-    setError(null); // Reset errors before search
-    setResults([]); // Clear previous results
-
-    if (!query) {
-      setError("Please enter a search query.");
-      return;
-    }
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setResults([]);
+    setError(null);
 
     try {
       const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
       const data = await response.json();
 
-      if (response.ok) {
-        if (data.results.length === 0) {
-          setError("No results found for Cincinnati.");
-        } else {
-          setResults(data.results);
-        }
+      if (data.error) {
+        setError(data.error);
       } else {
-        setError(data.error || "An error occurred.");
+        setResults(data.results);
       }
     } catch (err) {
-      setError("Failed to fetch results.");
+      setError("An unexpected error occurred.");
     }
   };
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Cincinnati Local Search</h1>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Enter your query"
-        style={{ padding: "10px", marginRight: "10px", width: "300px" }}
-      />
-      <button onClick={handleSearch} style={{ padding: "10px 20px" }}>
-        Search
-      </button>
+    <div>
+      <h1>Search for Cincinnati Results</h1>
+      <form onSubmit={handleSearch}>
+        <input
+          type="text"
+          placeholder="Enter your query"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          required
+        />
+        <button type="submit">Search</button>
+      </form>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p>Error: {error}</p>}
 
-      <ul style={{ marginTop: "20px" }}>
-        {results.map((result, index) => (
-          <li key={index} style={{ marginBottom: "10px" }}>
-            <a href={result.url} target="_blank" rel="noopener noreferrer">
-              {result.title}
-            </a>
-            <p>{result.snippet}</p>
-          </li>
-        ))}
-      </ul>
+      <div>
+        {results.length > 0 &&
+          results.map((result, index) => (
+            <div key={index}>
+              <h3>
+                <a href={result.url} target="_blank" rel="noopener noreferrer">
+                  {result.title}
+                </a>
+              </h3>
+              <p>{result.snippet || "No description available."}</p>
+            </div>
+          ))}
+        {results.length === 0 && !error && <p>No results yet. Try searching!</p>}
+      </div>
     </div>
   );
 }
