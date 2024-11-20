@@ -17,16 +17,17 @@ export default function Home() {
 
     try {
       const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        setResults(data.results);
-        setDetectedLocation(data.detectedLocation);
-      } else {
-        setError(data.error || "An error occurred while fetching results.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Unknown error occurred");
       }
+
+      const data = await response.json();
+      setResults(data.results);
+      setDetectedLocation(data.detectedLocation);
     } catch (err) {
-      setError("Failed to fetch results. Please try again.");
+      console.error("Search error:", err.message);
+      setError(err.message || "An error occurred while fetching results.");
     }
   };
 
